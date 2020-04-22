@@ -44,14 +44,15 @@ def list_files(number):
 
 def validate(validator, filename):
     if validator == 'appdata':
-        subprocess.run(['appstream-util', 'validate', filename])
-        subprocess.run(['appstream-util', 'validate-strict', filename])
+        subprocess.run(['appstream-util', 'validate', filename], check=True)
+        subprocess.run(['appstream-util', 'validate-strict', filename], check=True)
     elif validator == 'desktop':
-        subprocess.run(['desktop-file-validate', filename])
+        subprocess.run(['desktop-file-validate', filename], check=True)
 
 
 def main():
     github_repository = os.environ['GITHUB_REPOSITORY']
+    github_workspace = os.environ['GITHUB_WORKSPACE']
     github_event_path = os.environ['GITHUB_EVENT_PATH']
 
     payload = json.load(open(github_event_path, 'r'))
@@ -59,6 +60,8 @@ def main():
     # Exit if it's not a pull request
     if 'pull_request' not in payload:
         return
+
+    os.chdir(github_workspace)
 
     update_status('pending', 'Validating XDG files...')
 
