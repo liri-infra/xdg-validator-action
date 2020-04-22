@@ -11,8 +11,10 @@ import subprocess
 
 
 def run(cmd, *args):
-    print('+ ' + ' '.join(map(repr, cmd)))
-    return subprocess.run(cmd, *args)
+    r = subprocess.run(cmd, capture_output=True, *args)
+    if r.returncode != 0:
+        raise Exception(r.stderr.decode().strip())
+    return r
 
 
 def debug(message):
@@ -74,10 +76,10 @@ def list_files(number):
 
 def validate(validator, filename):
     if validator == 'appdata':
-        subprocess.run(['appstream-util', 'validate', filename], check=True)
-        subprocess.run(['appstream-util', 'validate-strict', filename], check=True)
+        run(['appstream-util', 'validate', filename])
+        run(['appstream-util', 'validate-strict', filename])
     elif validator == 'desktop':
-        subprocess.run(['desktop-file-validate', filename], check=True)
+        run(['desktop-file-validate', filename])
 
 
 def main():
