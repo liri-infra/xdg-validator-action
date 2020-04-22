@@ -8,6 +8,7 @@ import json
 import os
 import requests
 import subprocess
+import sys
 
 
 def run(cmd, *args):
@@ -91,7 +92,7 @@ def main():
 
     # Exit if it's not a pull request
     if 'pull_request' not in payload:
-        return
+        return True
 
     os.chdir(github_workspace)
 
@@ -115,9 +116,12 @@ def main():
 
     if len(error_filenames) > 0:
         update_status('failure', 'One or more XDG files are not valid')
+        return False
     else:
         update_status('success', 'XDG files are valid')
+        return True
 
 
 if __name__ == '__main__':
-    main()
+    if main() is False:
+        sys.exit(1)
