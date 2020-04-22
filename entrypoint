@@ -15,6 +15,36 @@ def run(cmd, *args):
     return subprocess.run(cmd, *args)
 
 
+def debug(message):
+    # https://help.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-a-debug-message
+    print(f'::debug::{message}')
+
+
+def issue_message(what, message, filename=None, line=None, col=None):
+    optional = []
+    if filename:
+        optional.append(f'file={filename}')
+    if line:
+        optional.append(f'line={line}')
+    if col:
+        optional.append(f'col={col}')
+    if optional:
+        middle = ' ' + ','.join(optional)
+    else:
+        middle = ''
+    print(f'::{what}{middle}::{message}')
+
+
+def warning(message, **kwargs):
+    # https://help.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-a-warning-message
+    issue_message('warning', message, **kwargs)
+
+
+def error(message, **kwargs):
+    # https://help.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-error-message
+    issue_message('error', message, **kwargs)
+
+
 def update_status(status, descr):
     # https://developer.github.com/v3/repos/statuses/#create-a-status
     if status not in ('error', 'failure', 'pending', 'success'):
@@ -72,11 +102,13 @@ def main():
         try:
             update_status('pending', f'Checking {filename}...')
 
+            debug(f'Checking {filename}...')
             if filename.endswith('.appdata.xml'):
                 validate('appdata', filename)
             elif filename.endswith('.desktop'):
                 validate('desktop', filename)
         except:
+            error(f'{filename} is not valid', filename=filename)
             error_filenames.append(filename)
 
     if len(error_filenames) > 0:
