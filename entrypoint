@@ -53,15 +53,20 @@ def update_status(status, descr):
     if status not in ('error', 'failure', 'pending', 'success'):
         raise SystemExit('Status can be one of error, failure, pending, success not {}'.format(status))
     github_repository = os.environ['GITHUB_REPOSITORY']
+    token = os.environ['GITHUB_TOKEN']
     sha = os.environ['GITHUB_SHA']
     url = f'https://api.github.com/repos/{github_repository}/statuses/{sha}'
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json',
+    }
     data = {
         'state': status,
         'target_url': 'https://github.com/liri-infra/xdg-validator-action',
         'description': descr,
-        'context': 'status-check/xdg'
+        'context': 'status-check/xdg',
     }
-    requests.post(url, data=data)
+    requests.post(url, headers=headers, json=data)
 
 
 def list_files(number):
