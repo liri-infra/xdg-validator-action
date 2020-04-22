@@ -58,7 +58,7 @@ def update_status(status, descr):
         'state': status,
         'target_url': 'https://github.com/liri-infra/xdg-validator-action',
         'description': descr,
-        'context': 'XDG validator'
+        'context': 'status-check/xdg'
     }
     requests.post(url, data=data)
 
