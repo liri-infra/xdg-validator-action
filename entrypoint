@@ -67,6 +67,8 @@ def main():
     filenames = list_files(payload['pull_request']['number'])
     for filename in filenames:
         try:
+            update_status('pending', f'Checking {filename}...')
+
             if filename.endswith('.appdata.xml'):
                 validate('appdata', filename)
             elif filename.endswith('.desktop'):
