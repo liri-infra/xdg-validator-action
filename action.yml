@@ -1,0 +1,11 @@
+name: 'xdg-validator-action'
+description: 'Validates freedesktop.org files'
+author: 'plfiorini'
+
+branding:
+  icon: 'check-circle'
+  color: 'blue'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'

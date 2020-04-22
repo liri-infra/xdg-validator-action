@@ -1,0 +1,7 @@
+/.git/
+/.github/
+/.travis/
+/.gitignore
+/README.md
+/LICENSES/
+/Makefile

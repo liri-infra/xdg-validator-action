@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2020 Pier Luigi Fiorini <pierluigi.fiorini@liri.io>
+#
+# SPDX-License-Identifier: MIT
+
+import json
+import os
+import requests
+import subprocess
+
+
+def run(cmd, *args):
+    print('+ ' + ' '.join(map(repr, cmd)))
+    return subprocess.run(cmd, *args)
+
+
+def update_status(status, descr):
+    # https://developer.github.com/v3/repos/statuses/#create-a-status
+    if status not in ('error', 'failure', 'pending', 'success'):
+        raise SystemExit('Status can be one of error, failure, pending, success not {}'.format(status))
+    github_repository = os.environ['GITHUB_REPOSITORY']
+    sha = os.environ['GITHUB_SHA']
+    url = f'https://api.github.com/repos/{github_repository}/statuses/{sha}'
+    data = {
+        'state': status,
+        'target_url': 'https://github.com/liri-infra/xdg-validator-action',
+        'description': descr,
+        'context': 'XDG validator'
+    }
+    requests.post(url, data=data)
+
+
+def list_files(number):
+    # https://developer.github.com/v3/pulls/#list-pull-requests-files
+    github_repository = os.environ['GITHUB_REPOSITORY']
+    url = f'https://api.github.com/repos/{github_repository}/pulls/{number}/files'
+    files = requests.get(url).json() or []
+    filenames = []
+    for entry in files:
+        filenames.append(entry['filename'])
+    return filenames
+
+
+def validate(validator, filename):
+    if validator == 'appdata':
+        subprocess.run(['appstream-util', 'validate', filename])
+        subprocess.run(['appstream-util', 'validate-strict', filename])
+    elif validator == 'desktop':
+        subprocess.run(['desktop-file-validate', filename])
+
+
+def main():
+    github_repository = os.environ['GITHUB_REPOSITORY']
+    github_event_path = os.environ['GITHUB_EVENT_PATH']
+
+    payload = json.load(open(github_event_path, 'r'))
+
+    # Exit if it's not a pull request
+    if 'pull_request' not in payload:
+        return
+
+    update_status('pending', 'Validating XDG files...')
+
+    error_filenames = []
+
+    filenames = list_files(payload['pull_request']['number'])
+    for filename in filenames:
+        try:
+            if filename.endswith('.appdata.xml'):
+                validate('appdata', filename)
+            elif filename.endswith('.desktop'):
+                validate('desktop', filename)
+        except:
+            error_filenames.append(filename)
+
+    if len(error_filenames) > 0:
+        update_status('failure', 'One or more XDG files are not valid')
+    else:
+        update_status('success', 'XDG files are valid')
+
+
+if __name__ == '__main__':
+    main()
