@@ -121,8 +121,9 @@ def main():
                 validate('appdata', filename)
             elif filename.endswith('.desktop'):
                 validate('desktop', filename)
-        except:
-            error(f'{filename} is not valid', filename=filename)
+        except Exception as e:
+            for line in e.message.split('\n'):
+                error(line.strip(), filename=filename)
             error_filenames.append(filename)
 
     if len(error_filenames) > 0:
