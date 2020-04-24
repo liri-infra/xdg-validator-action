@@ -82,9 +82,13 @@ def list_files(number):
 
 
 def validate(validator, filename):
+    strict = os.environ.get('INPUT_STRICT', 'false') == 'true'
+
     if validator == 'appdata':
-        run(['appstream-util', 'validate', filename])
-        run(['appstream-util', 'validate-strict', filename])
+        if strict is True:
+            run(['appstream-util', 'validate-strict', filename])
+        else:
+            run(['appstream-util', 'validate', filename])
     elif validator == 'desktop':
         run(['desktop-file-validate', filename])
 

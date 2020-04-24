@@ -9,3 +9,8 @@ branding:
 runs:
   using: 'docker'
   image: 'Dockerfile'
+
+inputs:
+  strict:
+    description: 'Whether you want to perform a strict validation'
+    default: false
