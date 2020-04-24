@@ -95,17 +95,18 @@ def main():
 
     payload = json.load(open(github_event_path, 'r'))
 
-    # Exit if it's not a pull request
-    if 'pull_request' not in payload:
-        return True
-
     os.chdir(github_workspace)
 
     update_status('pending', 'Validating XDG files...')
 
-    error_filenames = []
+    if 'pull_request' not in payload:
+        filenames = list_files(payload['pull_request']['number'])
+    else:
+        filenames = []
+        filenames += glob.glob('**/*.appdata.xml')
+        filenames += glob.glob('**/*.desktop')
 
-    filenames = list_files(payload['pull_request']['number'])
+    error_filenames = []
     for filename in filenames:
         try:
             update_status('pending', f'Checking {filename}...')
