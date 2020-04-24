@@ -12,10 +12,15 @@ import subprocess
 import sys
 
 
+class CommandError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
 def run(cmd, *args):
     r = subprocess.run(cmd, capture_output=True, *args)
     if r.returncode != 0:
-        raise Exception(r.stdout.decode().strip())
+        raise CommandError(r.stdout.decode().strip())
     return r
 
 
@@ -121,9 +126,12 @@ def main():
                 validate('appdata', filename)
             elif filename.endswith('.desktop'):
                 validate('desktop', filename)
-        except Exception as e:
+        except CommandError as e:
             for line in e.message.split('\n'):
                 error(line.strip(), filename=filename)
+            error_filenames.append(filename)
+        except Exception as e:
+            error('Error validating {}: {}'.format(filename, e), filename=filename)
             error_filenames.append(filename)
 
     if len(error_filenames) > 0:
