@@ -109,7 +109,7 @@ def main():
 
     update_status('pending', 'Validating XDG files...')
 
-    if 'pull_request' not in payload:
+    if 'pull_request' in payload:
         filenames = list_files(payload['pull_request']['number'])
     else:
         filenames = []
