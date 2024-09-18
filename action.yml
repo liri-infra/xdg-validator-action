@@ -1,16 +1,19 @@
-name: 'xdg-validator-action'
-description: 'Validates freedesktop.org files'
-author: 'plfiorini'
+name: "xdg-validator-action"
+description: "Validates freedesktop.org files"
+author: "plfiorini"
 
 branding:
-  icon: 'check-circle'
-  color: 'blue'
+  icon: "check-circle"
+  color: "blue"
 
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: node20
+  main: "dist/index.js"
 
 inputs:
+  gh-token:
+    description: "The GitHub token for authentication."
+    required: true
   strict:
-    description: 'Whether you want to perform a strict validation'
-    default: false
+    description: "Whether you want to perform a strict validation"
+    default: "false"
